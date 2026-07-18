@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#CC000000"
+    android:gravity="center">
+
+    <!-- 返回键 -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@android:drawable/ic_media_rew"
+        android:background="?android:attr/selectableItemBackground"
+        android:tint="#FFFFFF"
+        android:contentDescription="返回" />
+
+    <!-- 主页键 -->
+    <ImageButton
+        android:id="@+id/btnHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@android:drawable/ic_menu_home"
+        android:background="?android:attr/selectableItemBackground"
+        android:tint="#FFFFFF"
+        android:contentDescription="主页" />
+
+    <!-- 最近任务键 -->
+    <ImageButton
+        android:id="@+id/btnRecent"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@android:drawable/ic_menu_recent_history"
+        android:background="?android:attr/selectableItemBackground"
+        android:tint="#FFFFFF"
+        android:contentDescription="最近" />
+
+    <!-- 关闭按钮 -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="?android:attr/selectableItemBackground"
+        android:tint="#FF5555"
+        android:contentDescription="关闭" />
+
+</LinearLayout>

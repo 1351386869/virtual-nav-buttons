@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>虚拟导航按键</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 主界面 */
+        .main-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .main-screen h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .main-screen p {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f44336, #da190b);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            font-size: 13px;
+            padding: 12px;
+        }
+
+        .tip {
+            color: #666;
+            font-size: 12px;
+            margin-top: 24px;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        /* 底部虚拟按键栏 */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: none;
+            height: 56px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-bar.active {
+            display: flex;
+        }
+
+        .nav-btn {
+            flex: 1;
+            height: 100%;
+            border: none;
+            background: transparent;
+            color: #ccc;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            transition: background 0.15s, color 0.15s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .nav-btn:active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .nav-btn .icon {
+            font-size: 20px;
+        }
+
+        /* 状态指示 */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .status-dot.on {
+            background: #4CAF50;
+            box-shadow: 0 0 6px #4CAF50;
+        }
+
+        .status-dot.off {
+            background: #f44336;
+        }
+
+        /* 提示框 */
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 主界面 -->
+    <div class="main-screen" id="mainScreen">
+        <h1>📱 虚拟导航按键</h1>
+        <p>在屏幕底部显示返回 / 主页 / 最近任务按键<br>适合没有导航栏的手机使用</p>
+
+        <button class="btn btn-start" onclick="startNavBar()">
+            ▶ 启动底部按键
+        </button>
+        <button class="btn btn-stop" onclick="stopNavBar()">
+            ⏹ 关闭按键
+        </button>
+        <button class="btn btn-info" onclick="showInfo()">
+            ℹ 使用说明
+        </button>
+
+        <div class="tip">
+            提示：建议将页面添加到手机桌面，全屏使用效果更好<br>
+            返回键和最近任务键需要浏览器支持
+        </div>
+    </div>
+
+    <!-- 底部虚拟按键栏 -->
+    <div class="nav-bar" id="navBar">
+        <button class="nav-btn" onclick="handleBack()">
+            <span class="icon">◀</span>
+            <span>返回</span>
+        </button>
+        <button class="nav-btn" onclick="handleHome()">
+            <span class="icon">⌂</span>
+            <span>主页</span>
+        </button>
+        <button class="nav-btn" onclick="handleRecent()">
+            <span class="icon">▤</span>
+            <span>最近</span>
+        </button>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const navBar = document.getElementById('navBar');
+        const mainScreen = document.getElementById('mainScreen');
+        let navActive = false;
+
+        // 启动底部按键栏
+        function startNavBar() {
+            navBar.classList.add('active');
+            navActive = true;
+            showToast('✅ 底部按键已启动');
+        }
+
+        // 关闭底部按键栏
+        function stopNavBar() {
+            navBar.classList.remove('active');
+            navActive = false;
+            showToast('⏹ 底部按键已关闭');
+        }
+
+        // 返回键
+        function handleBack() {
+            // 优先尝试浏览器后退
+            if (window.history.length > 1) {
+                window.history.back();
+                showToast('◀ 返回上一页');
+            } else {
+                // 尝试发送 back 事件
+                dispatchKeyEvent('back');
+                showToast('◀ 返回键（无页面可回）');
+            }
+        }
+
+        // 主页键
+        function handleHome() {
+            // 跳转回首页或最小化
+            try {
+                // 尝试使用 Web App Manifest 的行为
+                if (navigator.app) {
+                    navigator.app.stopObservingEnterHome();
+                }
+            } catch(e) {}
+
+            // 跳转到空白页模拟回桌面
+            window.location.href = 'about:blank';
+            setTimeout(() => {
+                window.location.href = 'javascript:void(0)';
+            }, 100);
+            showToast('⌂ 回到主页');
+        }
+
+        // 最近任务键
+        function handleRecent() {
+            dispatchKeyEvent('recent');
+            showToast('▤ 最近任务');
+        }
+
+        // 发送虚拟按键事件
+        function dispatchKeyEvent(key) {
+            // Android Chrome/Firefox 支持的部分事件
+            const eventMap = {
+                'back': 'Back',
+                'home': 'Home',
+                'recent': 'AppSwitch'
+            };
+
+            try {
+                // 使用 MediaSession API（部分浏览器支持导航键）
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.setActionHandler(key === 'back' ? 'seekbackward' : 
+                                                           key === 'recent' ? 'seekforward' : null);
+                }
+            } catch(e) {}
+
+            // 发送自定义事件，供其他脚本监听
+            document.dispatchEvent(new CustomEvent('navKey', { detail: { key } }));
+        }
+
+        // 显示提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1500);
+        }
+
+        // 使用说明
+        function showInfo() {
+            alert(
+                '📱 虚拟导航按键使用说明\n\n' +
+                '1. 点击"启动底部按键"显示导航栏\n' +
+                '2. 返回键：浏览器后退 / 发送返回事件\n' +
+                '3. 主页键：模拟回桌面\n' +
+                '4. 最近任务键：发送任务切换事件\n\n' +
+                '💡 小技巧：\n' +
+                '• 在浏览器菜单中选择"添加到主屏幕"\n' +
+                '• 可以全屏使用，体验更接近原生\n\n' +
+                '⚠️ 注意：\n' +
+                '• 浏览器权限限制，部分按键功能可能受限\n' +
+                '• 返回键在 App 内可能无效\n' +
+                '• 推荐使用 Chrome 或 Edge 浏览器'
+            );
+        }
+
+        // 监听硬件返回键（如果浏览器支持）
+        window.addEventListener('popstate', function(e) {
+            if (navActive) {
+                showToast('◀ 硬件返回键');
+            }
+        });
+
+        // 防止底部按键栏被误触拖动
+        navBar.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
